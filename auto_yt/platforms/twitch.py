@@ -30,6 +30,8 @@ class Twitch:
     def post(self, url, payload, headers):
         response = requests.post(url, params=payload, headers=headers)
         if response.status_code == 200:
+            if response.text == '':
+                return
             data = json.loads(response.text)
             return data
         print(response.text)
@@ -40,7 +42,6 @@ class Twitch:
         url = '{}token'.format(self.oauth2_path)
         payload = { 'client_id':self.client_id, 'client_secret':self.client_secret, 'grant_type':'client_credentials' }
         data = self.post(url, payload, {})
-        print(data)
         config_path = '{}/config.yaml'.format(self.root_path)
         with open(config_path) as f:
             config_data = yaml.safe_load(f)    
@@ -48,19 +49,25 @@ class Twitch:
         self.access_token = data['access_token']
         with open('config.yaml', 'w') as f:
             yaml.safe_dump(config_data, f)
+        print('Acquired access token: {}'.format(data['access_token']))
         return
 
 
-    def check_token_valid(self):
+    def check_token_valid(self, token):
         url = '{}validate'.format(self.oauth2_path)
-        headers = {'Authorization' : 'OAuth {}'.format(self.access_token)}
-        print(headers)
+        headers = { 'Authorization' : 'OAuth {}'.format(token) }
+        print('Checking validity for token: {}'.format(token))
         data = self.get(url, {}, headers)
-        print(data)
+        print('Token is now valid.')
         return
 
 
-    def revoke_access_token(self):
+    def revoke_access_token(self, token):
+        url = '{}revoke'.format(self.oauth2_path)
+        payload = { 'client_id':self.client_id, 'token':token }
+        print('Revoking access token: {}'.format(token))
+        data = self.post(url, payload, {})
+        print('Successfully revoked access token: {}'.format(token))
         return
 
 
@@ -73,4 +80,5 @@ class Twitch:
 
 
     def test(self):
-        self.check_token_valid()
+        self.check_token_valid(self.access_token)
+        self.revoke_access_token(self.access_token)
