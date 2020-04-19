@@ -2,6 +2,8 @@ import requests
 import yaml
 import os
 import json
+import progressbar
+import shutil
 
 class Twitch:
     def __init__(self, client_id, client_secret, access_token):
@@ -71,14 +73,29 @@ class Twitch:
         return
 
 
-    def get_game_id(self):
+    def download_clips(self, clips):
+        for clip in clips:
+            url = '{}.mp4'.format(clip['thumbnail_url'][0:-20])
+            out_path = '{}/auto_yt/clips/{}'.format(self.root_path, clip['title'])
+            response = requests.get(url, stream=True)
+            with open(out_path, 'wb') as out_file:
+                shutil.copyfileobj(response.raw, out_file)
+            # print(clip['thumbnail_url'])
+            # print(url) 
         return
 
 
-    def get_clips(self):
-        return
+    def get_clips(self, token, date, game_id, num_of_clips):
+        url = '{}clips'.format(self.main_path)
+        headers = { 'Authorization' : 'OAuth {}'.format(token), 'Client-ID' : self.client_id }
+        payload = { 'started_at':date, 'game_id': game_id, 'first':num_of_clips }
+        data = self.get(url, payload, headers)
+        return data
 
 
     def test(self):
         self.check_token_valid(self.access_token)
+        clips = self.get_clips(self.access_token, '2020-03-30T00:00:00Z', 32982, 1)
+        self.download_clips(clips['data'])
+        # print(clips)
         self.revoke_access_token(self.access_token)
