@@ -1,13 +1,17 @@
 import yaml
 from auto_yt.platforms.twitch import Twitch
 
-with open('config.yaml') as f:
-    data = yaml.safe_load(f)
-    # print(data)
+def main():
 
-twitch_config = data['twitch']
-twitch = Twitch(twitch_config['client-id'], twitch_config['client-secret'], twitch_config['access-token'])
-twitch.test()
+    with open('config.yaml') as f:
+        data = yaml.safe_load(f)
 
-# with open('config.yaml', 'w') as f:
-#     yaml.safe_dump(data, f)
+    twitch_config = data['twitch']
+    twitch = Twitch(twitch_config['client-id'], twitch_config['client-secret'], twitch_config['access-token'])
+    twitch.check_token_valid()
+    twitch.clips = twitch.get_clips('2020-03-30T00:00:00Z', 32982, 1)
+    twitch.download_clips()
+    twitch.revoke_access_token()
+
+if __name__ == "__main__":
+    main()

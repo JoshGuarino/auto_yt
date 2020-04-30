@@ -56,26 +56,29 @@ class Twitch:
         return
 
 
-    def check_token_valid(self, token):
+    def check_token_valid(self):
         url = '{}validate'.format(self.oauth2_path)
-        headers = { 'Authorization' : 'OAuth {}'.format(token) }
-        print('Checking validity of token: {}'.format(token))
+        headers = { 'Authorization' : 'OAuth {}'.format(self.access_token) }
+        print('Checking validity of token: {}'.format(self.access_token))
         data = self.get(url, {}, headers)
         print('Token is valid.')
         return
 
 
-    def revoke_access_token(self, token):
+    def revoke_access_token(self):
         url = '{}revoke'.format(self.oauth2_path)
-        payload = { 'client_id':self.client_id, 'token':token }
-        print('Revoking access token: {}'.format(token))
+        payload = { 'client_id':self.client_id, 'token':self.access_token }
+        print('Revoking access token: {}'.format(self.access_token))
         data = self.post(url, payload, {})
-        print('Successfully revoked access token: {}'.format(token))
+        print('Successfully revoked access token: {}'.format(self.access_token))
         return
 
 
-    def download_clips(self, clips):
-        for clip in progressbar.progressbar(clips, prefix='Downloading clips: '):
+    def download_clips(self):
+        clips_url = f'{self.root_path}/auto_yt/clips/'
+        if not os.path.exists(clips_url):
+            os.makedirs(clips_url)
+        for clip in progressbar.progressbar(self.clips, prefix='Downloading clips: '):
             url = '{}.mp4'.format(clip['thumbnail_url'][0:-20])
             out_path = '{}/auto_yt/clips/{}'.format(self.root_path, clip['video_id'])
             response = requests.get(url, stream=True)
@@ -84,16 +87,9 @@ class Twitch:
         return
 
 
-    def get_clips(self, token, date, game_id, num_of_clips):
+    def get_clips(self, date, game_id, num_of_clips):
         url = '{}clips'.format(self.main_path)
-        headers = { 'Authorization' : 'OAuth {}'.format(token), 'Client-ID' : self.client_id }
+        headers = { 'Authorization' : 'OAuth {}'.format(self.access_token), 'Client-ID' : self.client_id }
         payload = { 'started_at':date, 'game_id': game_id, 'first':num_of_clips }
         data = self.get(url, payload, headers)
-        return data
-
-
-    def test(self):
-        self.check_token_valid(self.access_token)
-        self.clips = self.get_clips(self.access_token, '2020-03-30T00:00:00Z', 32982, 5)
-        self.download_clips(self.clips['data'])
-        self.revoke_access_token(self.access_token)
+        return data['data']
