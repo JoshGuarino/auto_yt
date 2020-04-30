@@ -9,7 +9,7 @@ def main():
     twitch_config = data['twitch']
     twitch = Twitch(twitch_config['client-id'], twitch_config['client-secret'], twitch_config['access-token'])
     twitch.check_token_valid()
-    twitch.clips = twitch.get_clips('2020-03-30T00:00:00Z', 32982, 1)
+    twitch.clips = twitch.get_clips('2020-03-30T00:00:00Z', twitch_config['games'], twitch_config['num-clips'])
     twitch.download_clips()
     twitch.revoke_access_token()
 

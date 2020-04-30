@@ -79,9 +79,9 @@ class Twitch:
         if not os.path.exists(clips_url):
             os.makedirs(clips_url)
         for clip in progressbar.progressbar(self.clips, prefix='Downloading clips: '):
-            url = f'{clip["thumbnail_url"][0:-20]}.mp4'
-            out_path = f'{clips_url}{clip["video_id"]}'
-            response = requests.get(url, stream=True)
+            down_url = f'{clip["thumbnail_url"][0:-20]}.mp4'
+            out_path = f'{clips_url}{clip["video_id"]}.mp4'
+            response = requests.get(down_url, stream=True)
             with open(out_path, 'wb') as out_file:
                 shutil.copyfileobj(response.raw, out_file)         
         return
