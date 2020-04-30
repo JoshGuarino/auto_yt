@@ -11,6 +11,7 @@ class Twitch:
         self.oauth2_path = 'https://id.twitch.tv/oauth2/'
         self.root_path = os.getcwd()
         self.game = None
+        self.clips = None
         self.client_id = client_id
         self.client_secret = client_secret
         self.access_token = access_token
@@ -58,9 +59,9 @@ class Twitch:
     def check_token_valid(self, token):
         url = '{}validate'.format(self.oauth2_path)
         headers = { 'Authorization' : 'OAuth {}'.format(token) }
-        print('Checking validity for token: {}'.format(token))
+        print('Checking validity of token: {}'.format(token))
         data = self.get(url, {}, headers)
-        print('Token is now valid.')
+        print('Token is valid.')
         return
 
 
@@ -74,14 +75,12 @@ class Twitch:
 
 
     def download_clips(self, clips):
-        for clip in clips:
+        for clip in progressbar.progressbar(clips, prefix='Downloading clips: '):
             url = '{}.mp4'.format(clip['thumbnail_url'][0:-20])
-            out_path = '{}/auto_yt/clips/{}'.format(self.root_path, clip['title'])
+            out_path = '{}/auto_yt/clips/{}'.format(self.root_path, clip['video_id'])
             response = requests.get(url, stream=True)
             with open(out_path, 'wb') as out_file:
-                shutil.copyfileobj(response.raw, out_file)
-            # print(clip['thumbnail_url'])
-            # print(url) 
+                shutil.copyfileobj(response.raw, out_file)         
         return
 
 
@@ -95,7 +94,6 @@ class Twitch:
 
     def test(self):
         self.check_token_valid(self.access_token)
-        clips = self.get_clips(self.access_token, '2020-03-30T00:00:00Z', 32982, 1)
-        self.download_clips(clips['data'])
-        # print(clips)
+        self.clips = self.get_clips(self.access_token, '2020-03-30T00:00:00Z', 32982, 5)
+        self.download_clips(self.clips['data'])
         self.revoke_access_token(self.access_token)
