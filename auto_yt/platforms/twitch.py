@@ -58,7 +58,7 @@ class Twitch:
 
     def check_token_valid(self):
         url = f'{self.oauth2_path}validate'
-        headers = { 'Authorization' : f'OAuth {self.access_token}' }
+        headers = { 'Authorization' : f'Bearer {self.access_token}' }
         print(f'Checking validity of token: {self.access_token}')
         data = self.get(url, {}, headers)
         print('Token is valid.')
@@ -89,7 +89,7 @@ class Twitch:
 
     def get_clips(self, date, game_id, num_of_clips):
         url = f'{self.main_path}clips'
-        headers = { 'Authorization' : f'OAuth {self.access_token}', 'Client-ID' : self.client_id }
+        headers = { 'Authorization' : f'Bearer {self.access_token}', 'Client-ID' : self.client_id }
         payload = { 'started_at':date, 'game_id': game_id, 'first':num_of_clips }
         data = self.get(url, payload, headers)
         return data['data']
