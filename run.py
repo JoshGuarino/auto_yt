@@ -1,6 +1,7 @@
 import yaml
 from auto_yt.platforms.twitch import Twitch
 import datetime
+import logging
 
 def main():
 
