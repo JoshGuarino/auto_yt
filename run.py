@@ -1,5 +1,5 @@
 import yaml
-from auto_yt.platforms.twitch import Twitch
+from auto_yt.twitch import Twitch
 import datetime
 import logging
 
