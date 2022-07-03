@@ -1,7 +1,7 @@
 import yaml
 from auto_yt.twitch import Twitch
 from auto_yt.edit import Edit
-from auto_yt.youtube import youtube
+from auto_yt.youtube import Youtube
 import datetime
 import logging
 

@@ -21,8 +21,7 @@ class Twitch:
         response = requests.get(url, params=payload, headers=headers)
         if response.status_code == 401:
             data = json.loads(response.text)
-            self.acquire_access_token()
-            return data
+            return data['message']
         if response.status_code == 200:
             data = json.loads(response.text)
             return data
@@ -61,7 +60,11 @@ class Twitch:
         headers = { 'Authorization' : f'Bearer {self.access_token}' }
         print(f'Checking validity of token: {self.access_token}')
         data = self.get(url, {}, headers)
-        print('Token is valid.')
+        if data == 'invalid access token':
+            print(data)
+            self.acquire_access_token()
+            return
+        print('token is valid')
         return
 
 
