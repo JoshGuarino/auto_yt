@@ -11,7 +11,7 @@ class Twitch:
         self.oauth2_path = 'https://id.twitch.tv/oauth2/'
         self.root_path = os.getcwd()
         self.game = None
-        self.clips = None
+        self.clips = []
         self.client_id = client_id
         self.client_secret = client_secret
         self.access_token = access_token
@@ -40,7 +40,7 @@ class Twitch:
         exit(1) 
 
 
-    def acquire_access_token(self):
+    def acquire_access_token(self) -> None:
         url = f'{self.oauth2_path}token'
         payload = { 'client_id':self.client_id, 'client_secret':self.client_secret, 'grant_type':'client_credentials' }
         data = self.post(url, payload, {})
@@ -52,10 +52,9 @@ class Twitch:
         with open('config.yaml', 'w') as f:
             yaml.safe_dump(config_data, f)
         print(f'Acquired access token: {self.access_token}')
-        return
 
 
-    def check_token_valid(self):
+    def check_token_valid(self) -> None:
         url = f'{self.oauth2_path}validate'
         headers = { 'Authorization' : f'Bearer {self.access_token}' }
         print(f'Checking validity of token: {self.access_token}')
@@ -65,34 +64,38 @@ class Twitch:
             self.acquire_access_token()
             return
         print('token is valid')
-        return
 
 
-    def revoke_access_token(self):
+    def revoke_access_token(self) -> None:
         url = f'{self.oauth2_path}revoke'
         payload = { 'client_id':self.client_id, 'token':self.access_token }
         print(f'Revoking access token: {self.access_token}')
         data = self.post(url, payload, {})
         print(f'Successfully revoked access token: {self.access_token}')
-        return
 
 
-    def download_clips(self):
-        clips_url = f'{self.root_path}/auto_yt/clips/'
+    def download_clips(self) -> None:
+        clips_url = f'{self.root_path}/auto_yt/clips'
         if not os.path.exists(clips_url):
             os.makedirs(clips_url)
         for clip in progressbar.progressbar(self.clips, prefix='Downloading clips: '):
             down_url = f'{clip["thumbnail_url"][0:-20]}.mp4'
-            out_path = f'{clips_url}{clip["video_id"]}.mp4'
+            out_path = f'{clips_url}/{clip["id"]}.mp4'
             response = requests.get(down_url, stream=True)
             with open(out_path, 'wb') as out_file:
                 shutil.copyfileobj(response.raw, out_file)         
-        return
 
 
-    def get_clips(self, date, game_id, num_of_clips):
+    def get_clips(self, date, game_id: int, num_of_clips: int, clips_length: int = 0) -> None:
         url = f'{self.main_path}clips'
         headers = { 'Authorization' : f'Bearer {self.access_token}', 'Client-ID' : self.client_id }
-        payload = { 'started_at':date, 'game_id': game_id, 'first':num_of_clips }
+        payload = { 'started_at': date, 'game_id': game_id, 'first': num_of_clips }
         data = self.get(url, payload, headers)
-        return data['data']
+        for clip in data['data']:
+            if clip['language'] != 'en':
+                continue
+            clips_length += clip['duration']
+            self.clips.append(clip)
+        if clips_length < 600:
+            self.get_clips(date, game_id, num_of_clips, clips_length)
+        print(len(self.clips))
