@@ -7,7 +7,7 @@ import datetime
 def main():
     with open('config.yaml') as f:
         data = yaml.safe_load(f)
-    date = datetime.date.today() - datetime.timedelta(days=1)
+    date = datetime.date.today() - datetime.timedelta(days=7)
     twitch_config = data['twitch']
     twitch = Twitch(twitch_config['client-id'], twitch_config['client-secret'], twitch_config['access-token'])
     twitch.check_token_valid()

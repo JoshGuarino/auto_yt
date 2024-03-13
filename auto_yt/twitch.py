@@ -7,8 +7,8 @@ import shutil
 
 class Twitch:
     def __init__(self, client_id, client_secret, access_token):
-        self.main_path = 'https://api.twitch.tv/helix/'
-        self.oauth2_path = 'https://id.twitch.tv/oauth2/'
+        self.base_url = 'https://api.twitch.tv/helix/'
+        self.oauth2_url = 'https://id.twitch.tv/oauth2/'
         self.root_path = os.getcwd()
         self.game = None
         self.clips = []
@@ -41,7 +41,7 @@ class Twitch:
 
 
     def acquire_access_token(self) -> None:
-        url = f'{self.oauth2_path}token'
+        url = f'{self.oauth2_url}token'
         payload = { 'client_id':self.client_id, 'client_secret':self.client_secret, 'grant_type':'client_credentials' }
         data = self.post(url, payload, {})
         config_path = f'{self.root_path}/config.yaml'
@@ -55,7 +55,7 @@ class Twitch:
 
 
     def check_token_valid(self) -> None:
-        url = f'{self.oauth2_path}validate'
+        url = f'{self.oauth2_url}validate'
         headers = { 'Authorization' : f'Bearer {self.access_token}' }
         print(f'Checking validity of token: {self.access_token}')
         data = self.get(url, {}, headers)
@@ -67,7 +67,7 @@ class Twitch:
 
 
     def revoke_access_token(self) -> None:
-        url = f'{self.oauth2_path}revoke'
+        url = f'{self.oauth2_url}revoke'
         payload = { 'client_id':self.client_id, 'token':self.access_token }
         print(f'Revoking access token: {self.access_token}')
         data = self.post(url, payload, {})
@@ -86,8 +86,8 @@ class Twitch:
                 shutil.copyfileobj(response.raw, out_file)         
 
 
-    def get_clips(self, date, game_id: int, num_of_clips: int, clips_length: int = 0) -> None:
-        url = f'{self.main_path}clips'
+    def get_clips(self, date, game_id: int, num_of_clips: int = 25, clips_length: int = 0) -> None:
+        url = f'{self.base_url}clips'
         headers = { 'Authorization' : f'Bearer {self.access_token}', 'Client-ID' : self.client_id }
         payload = { 'started_at': date, 'game_id': game_id, 'first': num_of_clips }
         data = self.get(url, payload, headers)
@@ -98,4 +98,3 @@ class Twitch:
             self.clips.append(clip)
         if clips_length < 600:
             self.get_clips(date, game_id, num_of_clips, clips_length)
-        print(len(self.clips))
