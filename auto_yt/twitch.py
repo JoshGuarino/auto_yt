@@ -86,7 +86,7 @@ class Twitch:
                 shutil.copyfileobj(response.raw, out_file)         
 
 
-    def get_clips(self, date, game_id: int, num_of_clips: int = 25, clips_length: int = 0) -> None:
+    def get_clips(self, date, game_id: int, num_of_clips: int = 25, video_length: int = 600, clips_length: int = 0) -> None:
         url = f'{self.base_url}clips'
         headers = { 'Authorization' : f'Bearer {self.access_token}', 'Client-ID' : self.client_id }
         payload = { 'started_at': date, 'game_id': game_id, 'first': num_of_clips }
@@ -96,5 +96,5 @@ class Twitch:
                 continue
             clips_length += clip['duration']
             self.clips.append(clip)
-        if clips_length < 600:
+        if clips_length < video_length:
             self.get_clips(date, game_id, num_of_clips, clips_length)
