@@ -4,7 +4,7 @@ from auto_yt.edit import Edit
 from auto_yt.youtube import Youtube
 import datetime
 
-def main():
+def main() -> None:
     with open('config.yaml') as f:
         data = yaml.safe_load(f)
     date = datetime.date.today() - datetime.timedelta(days=7)
