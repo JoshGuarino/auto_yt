@@ -420,6 +420,7 @@
                 "sha256:223e8b5359c2efc4b30555531f09e9f2f3589bcd7fdd389271191031b49b7a63",
                 "sha256:4bdd694238bef1485ce839d67967ab50af8f9272aab687c0d7702a01da0be090"
             ],
+            "index": "pypi",
             "markers": "python_version >= '3.7'",
             "version": "==4.66.6"
         },
