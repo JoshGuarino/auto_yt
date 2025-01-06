@@ -3,5 +3,5 @@ class Youtube:
         self.base_url = 'https://www.googleapis.com/youtube/v3'
         self.access_token = access_token
 
-        def upload_video(self) -> None:
-            pass
+    def upload_video(self) -> None:
+        pass
